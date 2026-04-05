@@ -114,9 +114,19 @@ func (h *Handler) handleForward(interaction *discordgo.Interaction) {
 	}
 
 	channelName := ""
+	threadName := ""
 	channel, err := h.session.Channel(interaction.ChannelID)
 	if err == nil {
 		channelName = channel.Name
+		if isThread(channel) {
+			threadName = channel.Name
+			if channel.ParentID != "" {
+				parent, perr := h.session.Channel(channel.ParentID)
+				if perr == nil {
+					channelName = parent.Name
+				}
+			}
+		}
 	}
 
 	serverName := ""
@@ -132,17 +142,13 @@ func (h *Handler) handleForward(interaction *discordgo.Interaction) {
 	emailData := email.ForwardData{
 		ServerName:      serverName,
 		ChannelName:     channelName,
+		ThreadName:      threadName,
 		MessageLink:     messageLink,
 		ContextMessages: contextMessages,
 		TargetMessage:   target,
 	}
 
-	subject := "[Discord] Forwarded chat"
-	if channelName != "" {
-		subject = fmt.Sprintf("[Discord] Forwarded chat in #%s", channelName)
-	} else if serverName == "" && target.AuthorName != "" {
-		subject = fmt.Sprintf("[Discord] Forwarded DM with %s", target.AuthorName)
-	}
+	subject := buildSubject(channelName, threadName, serverName, target.AuthorName)
 
 	if err := h.mailer.Send(h.gmailUser, subject, emailData); err != nil {
 		slog.Error("email send failed", "error", err)
@@ -223,6 +229,24 @@ func (h *Handler) verifySignature(r *http.Request, body []byte) bool {
 	}
 	msg := append([]byte(timestamp), body...)
 	return ed25519.Verify(h.publicKey, msg, sig)
+}
+
+func isThread(ch *discordgo.Channel) bool {
+	return ch.Type == discordgo.ChannelTypeGuildPublicThread ||
+		ch.Type == discordgo.ChannelTypeGuildPrivateThread
+}
+
+func buildSubject(channelName, threadName, serverName, authorName string) string {
+	if channelName != "" && threadName != "" {
+		return fmt.Sprintf("[Discord] Forwarded chat in #%s › %s", channelName, threadName)
+	}
+	if channelName != "" {
+		return fmt.Sprintf("[Discord] Forwarded chat in #%s", channelName)
+	}
+	if serverName == "" && authorName != "" {
+		return fmt.Sprintf("[Discord] Forwarded DM with %s", authorName)
+	}
+	return "[Discord] Forwarded chat"
 }
 
 func respondJSON(w http.ResponseWriter, v any) {
