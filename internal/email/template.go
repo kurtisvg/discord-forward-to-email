@@ -8,10 +8,11 @@ type MessageData struct {
 }
 
 type ForwardData struct {
-	ServerName    string
-	ChannelName   string
-	MessageLink   string
-	TargetMessage MessageData
+	ServerName      string
+	ChannelName     string
+	MessageLink     string
+	ContextMessages []MessageData
+	TargetMessage   MessageData
 }
 
 var emailTemplate = template.Must(template.New("email").Parse(emailTemplateHTML))
@@ -35,7 +36,21 @@ const emailTemplateHTML = `<!DOCTYPE html>
           <hr style="border:none;border-top:1px solid #e0e0e0;margin-top:16px;">
         </td></tr>
 
-        {{/* Target message */}}
+        {{/* Context messages */}}
+        {{range .ContextMessages}}
+        <tr><td style="padding:0 24px;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="padding:12px 0 12px 12px;">
+                <p style="margin:0 0 2px 0;font-weight:bold;font-size:14px;color:#111;">{{.AuthorName}}</p>
+                <p style="margin:0;font-size:14px;color:#333;line-height:1.5;">{{.Content}}</p>
+              </td>
+            </tr>
+          </table>
+        </td></tr>
+        {{end}}
+
+        {{/* Target message (highlighted) */}}
         <tr><td style="padding:0 24px;">
           <table width="100%" cellpadding="0" cellspacing="0">
             <tr>
