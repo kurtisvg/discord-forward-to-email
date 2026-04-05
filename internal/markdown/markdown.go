@@ -2,6 +2,7 @@ package markdown
 
 import (
 	"html"
+	"html/template"
 	"regexp"
 	"strconv"
 	"strings"
@@ -19,8 +20,8 @@ var (
 	blockquoteRe    = regexp.MustCompile(`(?m)^&gt; (.+)$`)
 )
 
-// ToHTML converts Discord-flavored markdown to HTML.
-func ToHTML(s string) string {
+// ToHTML converts Discord-flavored markdown to safe HTML.
+func ToHTML(s string) template.HTML {
 	// Escape HTML first so user content can't inject tags.
 	s = html.EscapeString(s)
 
@@ -69,7 +70,7 @@ func ToHTML(s string) string {
 		s = strings.Replace(s, placeholder(i), val, 1)
 	}
 
-	return s
+	return template.HTML(s)
 }
 
 func placeholder(i int) string {

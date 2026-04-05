@@ -1,6 +1,7 @@
 package markdown
 
 import (
+	"html/template"
 	"testing"
 )
 
@@ -10,7 +11,7 @@ func TestToHTML(t *testing.T) {
 	tests := []struct {
 		name  string
 		input string
-		want  string
+		want  template.HTML
 	}{
 		{
 			name:  "bold",
