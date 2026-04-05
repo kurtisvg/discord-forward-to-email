@@ -87,6 +87,21 @@ func TestToHTML(t *testing.T) {
 			input: "just plain text",
 			want:  "just plain text",
 		},
+		{
+			name:  "empty string",
+			input: "",
+			want:  "",
+		},
+		{
+			name:  "code block preserves formatting",
+			input: "```\n**not bold** *not italic*\n```",
+			want:  "<pre><code>**not bold** *not italic*</code></pre>",
+		},
+		{
+			name:  "multi-line blockquote",
+			input: "> line one\n> line two",
+			want:  "<blockquote>line one</blockquote><br><blockquote>line two</blockquote>",
+		},
 	}
 
 	for _, tt := range tests {

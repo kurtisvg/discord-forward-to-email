@@ -3,6 +3,7 @@ package markdown
 import (
 	"html"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -72,5 +73,5 @@ func ToHTML(s string) string {
 }
 
 func placeholder(i int) string {
-	return "\x00PH" + string(rune('0'+i)) + "\x00"
+	return "\x00PH" + strconv.Itoa(i) + "\x00"
 }
