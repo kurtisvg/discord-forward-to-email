@@ -10,8 +10,11 @@ import (
 	"net/http"
 	"strings"
 
+	"html/template"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/discord-forward-to-email/internal/email"
+	"github.com/discord-forward-to-email/internal/markdown"
 )
 
 type Handler struct {
@@ -188,7 +191,7 @@ func messageData(msg *discordgo.Message) email.MessageData {
 	return email.MessageData{
 		AuthorName:  authorName,
 		AvatarURL:   avatarURL(msg.Author),
-		Content:     msg.Content,
+		Content:     template.HTML(markdown.ToHTML(msg.Content)),
 		Attachments: attachments,
 	}
 }
