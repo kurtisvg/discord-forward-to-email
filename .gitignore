@@ -1,0 +1,12 @@
+# Binary
+discord-forward-to-email
+
+# Environment
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
