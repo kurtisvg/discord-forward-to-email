@@ -63,6 +63,14 @@ func TestMessageData(t *testing.T) {
 			wantAuthor: "bob456",
 		},
 		{
+			name: "markdown conversion",
+			msg: &discordgo.Message{
+				Author:  &discordgo.User{Username: "bob", Avatar: "def"},
+				Content: "**bold**",
+			},
+			wantAuthor: "bob",
+		},
+		{
 			name: "with attachments",
 			msg: &discordgo.Message{
 				Author: &discordgo.User{Username: "charlie", Avatar: "ghi"},
@@ -85,8 +93,11 @@ func TestMessageData(t *testing.T) {
 			if md.AvatarURL == "" {
 				t.Error("expected non-empty avatar URL")
 			}
-			if md.Content != tt.msg.Content {
-				t.Errorf("expected content %q, got %q", tt.msg.Content, md.Content)
+			if tt.msg.Content != "" && md.Content == "" {
+				t.Error("expected non-empty content")
+			}
+			if tt.msg.Content == "**bold**" && !strings.Contains(string(md.Content), "<strong>") {
+				t.Error("expected markdown to be converted to HTML")
 			}
 			if len(md.Attachments) != len(tt.msg.Attachments) {
 				t.Fatalf("expected %d attachments, got %d", len(tt.msg.Attachments), len(md.Attachments))
@@ -94,6 +105,10 @@ func TestMessageData(t *testing.T) {
 			for i, a := range md.Attachments {
 				if a.Filename != tt.msg.Attachments[i].Filename {
 					t.Errorf("attachment %d: expected filename %q, got %q", i, tt.msg.Attachments[i].Filename, a.Filename)
+				}
+				wantImage := strings.HasPrefix(tt.msg.Attachments[i].ContentType, "image/")
+				if a.IsImage != wantImage {
+					t.Errorf("attachment %d: expected IsImage=%v, got %v", i, wantImage, a.IsImage)
 				}
 			}
 		})

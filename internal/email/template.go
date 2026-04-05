@@ -11,7 +11,7 @@ type Attachment struct {
 type MessageData struct {
 	AuthorName  string
 	AvatarURL   string
-	Content     string
+	Content     template.HTML
 	Attachments []Attachment
 }
 
