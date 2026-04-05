@@ -73,6 +73,9 @@ func ToHTML(s string) template.HTML {
 	return template.HTML(s)
 }
 
+// placeholder returns a null-byte-delimited token that temporarily replaces
+// extracted content (code blocks, inline code, links) so that later regex
+// passes don't modify it. Placeholders are restored at the end of ToHTML.
 func placeholder(i int) string {
 	return "\x00PH" + strconv.Itoa(i) + "\x00"
 }
