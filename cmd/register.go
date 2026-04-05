@@ -2,27 +2,28 @@ package cmd
 
 import (
 	"log/slog"
+	"os"
 
 	"github.com/bwmarrin/discordgo"
 )
 
-func runRegister() {
-	token := requireEnv("DISCORD_TOKEN")
-	appID := requireEnv("DISCORD_APP_ID")
+func runRegister(opts options) {
+	requireFlag("discord-token", opts.discordToken)
+	requireFlag("discord-app-id", opts.discordAppID)
 
-	s, err := discordgo.New("Bot " + token)
+	s, err := discordgo.New("Bot " + opts.discordToken)
 	if err != nil {
 		slog.Error("failed to create discord session", "error", err)
-		return
+		os.Exit(1)
 	}
 
-	cmd, err := s.ApplicationCommandCreate(appID, "", &discordgo.ApplicationCommand{
+	cmd, err := s.ApplicationCommandCreate(opts.discordAppID, "", &discordgo.ApplicationCommand{
 		Name: "Forward to inbox",
 		Type: discordgo.MessageApplicationCommand,
 	})
 	if err != nil {
 		slog.Error("failed to register command", "error", err)
-		return
+		os.Exit(1)
 	}
 
 	slog.Info("registered command", "name", cmd.Name, "id", cmd.ID)
