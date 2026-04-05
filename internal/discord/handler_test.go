@@ -21,25 +21,45 @@ func newTestHandler(t *testing.T) (*Handler, ed25519.PrivateKey) {
 	return &Handler{publicKey: pub}, priv
 }
 
-func signRequest(t *testing.T, priv ed25519.PrivateKey, timestamp string, body []byte) (string, string) {
+func signBody(t *testing.T, priv ed25519.PrivateKey, timestamp string, body []byte) string {
 	t.Helper()
-	msg := append([]byte(timestamp), body...)
-	sig := ed25519.Sign(priv, msg)
-	return hex.EncodeToString(sig), timestamp
+	msg := make([]byte, 0, len(timestamp)+len(body))
+	msg = append(msg, []byte(timestamp)...)
+	msg = append(msg, body...)
+	return hex.EncodeToString(ed25519.Sign(priv, msg))
+}
+
+func postInteraction(t *testing.T, h *Handler, sig, timestamp string, body []byte) *httptest.ResponseRecorder {
+	t.Helper()
+	req := httptest.NewRequest(http.MethodPost, "/interactions", bytes.NewReader(body))
+	req.Header.Set("X-Signature-Ed25519", sig)
+	req.Header.Set("X-Signature-Timestamp", timestamp)
+	rec := httptest.NewRecorder()
+	h.HandleInteraction(rec, req)
+	return rec
+}
+
+func TestHandleInteraction_MethodNotAllowed(t *testing.T) {
+	t.Parallel()
+	h, _ := newTestHandler(t)
+
+	req := httptest.NewRequest(http.MethodGet, "/interactions", nil)
+	rec := httptest.NewRecorder()
+	h.HandleInteraction(rec, req)
+
+	if rec.Code != http.StatusMethodNotAllowed {
+		t.Fatalf("expected 405, got %d", rec.Code)
+	}
 }
 
 func TestHandleInteraction_Ping(t *testing.T) {
+	t.Parallel()
 	h, priv := newTestHandler(t)
 
 	body, _ := json.Marshal(discordgo.Interaction{Type: discordgo.InteractionPing})
-	sig, ts := signRequest(t, priv, "1234567890", body)
+	sig := signBody(t, priv, "1234567890", body)
 
-	req := httptest.NewRequest(http.MethodPost, "/interactions", bytes.NewReader(body))
-	req.Header.Set("X-Signature-Ed25519", sig)
-	req.Header.Set("X-Signature-Timestamp", ts)
-
-	rec := httptest.NewRecorder()
-	h.HandleInteraction(rec, req)
+	rec := postInteraction(t, h, sig, "1234567890", body)
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d", rec.Code)
@@ -55,30 +75,59 @@ func TestHandleInteraction_Ping(t *testing.T) {
 }
 
 func TestHandleInteraction_InvalidSignature(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name      string
+		sig       string
+		timestamp string
+	}{
+		{"malformed hex", "not-hex", "1234567890"},
+		{"empty signature", "", "1234567890"},
+		{"missing timestamp", "aabbccdd", ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			h, _ := newTestHandler(t)
+			body, _ := json.Marshal(discordgo.Interaction{Type: discordgo.InteractionPing})
+
+			rec := postInteraction(t, h, tt.sig, tt.timestamp, body)
+
+			if rec.Code != http.StatusUnauthorized {
+				t.Fatalf("expected 401, got %d", rec.Code)
+			}
+		})
+	}
+}
+
+func TestHandleInteraction_WrongKey(t *testing.T) {
+	t.Parallel()
 	h, _ := newTestHandler(t)
 
+	// Sign with a different key.
+	_, otherPriv, _ := ed25519.GenerateKey(nil)
 	body, _ := json.Marshal(discordgo.Interaction{Type: discordgo.InteractionPing})
+	sig := signBody(t, otherPriv, "1234567890", body)
 
-	req := httptest.NewRequest(http.MethodPost, "/interactions", bytes.NewReader(body))
-	req.Header.Set("X-Signature-Ed25519", "bad")
-	req.Header.Set("X-Signature-Timestamp", "1234567890")
-
-	rec := httptest.NewRecorder()
-	h.HandleInteraction(rec, req)
+	rec := postInteraction(t, h, sig, "1234567890", body)
 
 	if rec.Code != http.StatusUnauthorized {
 		t.Fatalf("expected 401, got %d", rec.Code)
 	}
 }
 
-func TestHandleInteraction_MethodNotAllowed(t *testing.T) {
-	h, _ := newTestHandler(t)
+func TestHandleInteraction_MalformedJSON(t *testing.T) {
+	t.Parallel()
+	h, priv := newTestHandler(t)
 
-	req := httptest.NewRequest(http.MethodGet, "/interactions", nil)
-	rec := httptest.NewRecorder()
-	h.HandleInteraction(rec, req)
+	body := []byte(`{not json}`)
+	sig := signBody(t, priv, "1234567890", body)
 
-	if rec.Code != http.StatusMethodNotAllowed {
-		t.Fatalf("expected 405, got %d", rec.Code)
+	rec := postInteraction(t, h, sig, "1234567890", body)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d", rec.Code)
 	}
 }
