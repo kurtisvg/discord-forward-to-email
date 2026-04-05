@@ -10,15 +10,15 @@ func TestBuildMIME(t *testing.T) {
 
 	msg := string(buildMIME("from@test.com", "to@test.com", "Test Subject", "<h1>Hello</h1>"))
 
-	headers := map[string]string{
-		"From: from@test.com":                        "",
-		"To: to@test.com":                            "",
-		"Subject: Test Subject":                      "",
-		"MIME-Version: 1.0":                          "",
-		"Content-Type: text/html; charset=\"UTF-8\"": "",
+	wantHeaders := []string{
+		"From: from@test.com",
+		"To: to@test.com",
+		"Subject: Test Subject",
+		"MIME-Version: 1.0",
+		`Content-Type: text/html; charset="UTF-8"`,
 	}
 
-	for header := range headers {
+	for _, header := range wantHeaders {
 		if !strings.Contains(msg, header) {
 			t.Errorf("missing header: %s", header)
 		}

@@ -7,18 +7,23 @@ import (
 func TestParseFlags(t *testing.T) {
 	t.Parallel()
 
-	opts := parseFlags([]string{"-port", "9090"})
-	if opts.port != "9090" {
-		t.Fatalf("expected port 9090, got %s", opts.port)
+	tests := []struct {
+		name     string
+		args     []string
+		wantPort string
+	}{
+		{"default port", []string{}, "8080"},
+		{"custom port", []string{"-port", "9090"}, "9090"},
 	}
-}
 
-func TestParseFlags_Defaults(t *testing.T) {
-	t.Parallel()
-
-	opts := parseFlags([]string{})
-	if opts.port != "8080" {
-		t.Fatalf("expected default port 8080, got %s", opts.port)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			opts := parseFlags(tt.args)
+			if opts.port != tt.wantPort {
+				t.Fatalf("expected port %s, got %s", tt.wantPort, opts.port)
+			}
+		})
 	}
 }
 

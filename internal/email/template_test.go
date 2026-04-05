@@ -6,80 +6,117 @@ import (
 	"testing"
 )
 
-func TestEmailTemplate_ServerChannel(t *testing.T) {
+func TestEmailTemplate(t *testing.T) {
 	t.Parallel()
 
-	data := ForwardData{
-		ServerName:  "Acme Corp",
-		ChannelName: "support",
-		MessageLink: "https://discord.com/channels/123/456/789",
-		TargetMessage: MessageData{
-			AuthorName: "Alice",
-			Content:    "Hello world",
+	tests := []struct {
+		name       string
+		data       ForwardData
+		want       []string
+		wantAbsent []string
+	}{
+		{
+			name: "server and channel",
+			data: ForwardData{
+				ServerName:  "Acme Corp",
+				ChannelName: "support",
+				MessageLink: "https://discord.com/channels/123/456/789",
+				TargetMessage: MessageData{
+					AuthorName: "Alice",
+					Content:    "Hello world",
+				},
+			},
+			want: []string{
+				"Acme Corp",
+				"#support",
+				"Alice",
+				"Hello world",
+				"https://discord.com/channels/123/456/789",
+				"Open in Discord",
+			},
+			wantAbsent: []string{"Forwarded DM"},
+		},
+		{
+			name: "DM with no server",
+			data: ForwardData{
+				MessageLink: "https://discord.com/channels/@me/456/789",
+				TargetMessage: MessageData{
+					AuthorName: "Bob",
+					Content:    "DM content",
+				},
+			},
+			want:       []string{"Forwarded DM with Bob", "DM content"},
+			wantAbsent: []string{"Acme Corp", "#support"},
+		},
+		{
+			name: "with context messages",
+			data: ForwardData{
+				ServerName:  "Test Server",
+				ChannelName: "general",
+				MessageLink: "https://discord.com/channels/1/2/3",
+				ContextMessages: []MessageData{
+					{AuthorName: "Alice", Content: "First message"},
+					{AuthorName: "Bob", Content: "Second message"},
+				},
+				TargetMessage: MessageData{
+					AuthorName: "Charlie",
+					Content:    "Target message",
+				},
+			},
+			want: []string{"First message", "Second message", "Target message"},
+		},
+		{
+			name: "no context messages",
+			data: ForwardData{
+				ServerName:  "Test Server",
+				ChannelName: "general",
+				MessageLink: "https://discord.com/channels/1/2/3",
+				TargetMessage: MessageData{
+					AuthorName: "Alice",
+					Content:    "Solo message",
+				},
+			},
+			want: []string{"Solo message", "Alice"},
 		},
 	}
 
-	var buf bytes.Buffer
-	if err := emailTemplate.Execute(&buf, data); err != nil {
-		t.Fatalf("template error: %v", err)
-	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-	html := buf.String()
+			var buf bytes.Buffer
+			if err := emailTemplate.Execute(&buf, tt.data); err != nil {
+				t.Fatalf("template error: %v", err)
+			}
+			html := buf.String()
 
-	if !strings.Contains(html, "Acme Corp") {
-		t.Error("missing server name")
-	}
-	if !strings.Contains(html, "#support") {
-		t.Error("missing channel name")
-	}
-	if !strings.Contains(html, "Alice") {
-		t.Error("missing author name")
-	}
-	if !strings.Contains(html, "Hello world") {
-		t.Error("missing message content")
-	}
-	if !strings.Contains(html, "https://discord.com/channels/123/456/789") {
-		t.Error("missing message link")
-	}
-}
-
-func TestEmailTemplate_DM(t *testing.T) {
-	t.Parallel()
-
-	data := ForwardData{
-		MessageLink: "https://discord.com/channels/@me/456/789",
-		TargetMessage: MessageData{
-			AuthorName: "Bob",
-			Content:    "DM content",
-		},
-	}
-
-	var buf bytes.Buffer
-	if err := emailTemplate.Execute(&buf, data); err != nil {
-		t.Fatalf("template error: %v", err)
-	}
-
-	html := buf.String()
-
-	if !strings.Contains(html, "Forwarded DM with Bob") {
-		t.Error("missing DM header")
+			for _, s := range tt.want {
+				if !strings.Contains(html, s) {
+					t.Errorf("expected %q in output", s)
+				}
+			}
+			for _, s := range tt.wantAbsent {
+				if strings.Contains(html, s) {
+					t.Errorf("did not expect %q in output", s)
+				}
+			}
+		})
 	}
 }
 
-func TestEmailTemplate_WithContext(t *testing.T) {
+func TestEmailTemplate_TargetHighlight(t *testing.T) {
 	t.Parallel()
 
 	data := ForwardData{
-		ServerName:  "Test Server",
+		ServerName:  "Test",
 		ChannelName: "general",
 		MessageLink: "https://discord.com/channels/1/2/3",
 		ContextMessages: []MessageData{
-			{AuthorName: "Alice", Content: "First message"},
-			{AuthorName: "Bob", Content: "Second message"},
+			{AuthorName: "Alice", Content: "Context msg"},
 		},
 		TargetMessage: MessageData{
-			AuthorName: "Charlie",
-			Content:    "Target message",
+			AuthorName: "Bob",
+			Content:    "Target msg",
 		},
 	}
 
@@ -87,48 +124,20 @@ func TestEmailTemplate_WithContext(t *testing.T) {
 	if err := emailTemplate.Execute(&buf, data); err != nil {
 		t.Fatalf("template error: %v", err)
 	}
-
 	html := buf.String()
 
-	if !strings.Contains(html, "First message") {
-		t.Error("missing first context message")
-	}
-	if !strings.Contains(html, "Second message") {
-		t.Error("missing second context message")
-	}
-	if !strings.Contains(html, "Target message") {
-		t.Error("missing target message")
-	}
+	// The context message's containing <td> should not have the blurple border.
+	// Find the <td> that wraps "Context msg" by looking at the preceding markup.
+	contextIdx := strings.Index(html, "Context msg")
+	contextTd := html[strings.LastIndex(html[:contextIdx], "<td"):contextIdx]
 
-	// Target should have blurple highlight, context should not.
-	targetIdx := strings.Index(html, "Target message")
-	blurpleIdx := strings.LastIndex(html[:targetIdx], "#5865F2")
-	firstMsgIdx := strings.Index(html, "First message")
+	targetIdx := strings.Index(html, "Target msg")
+	targetTd := html[strings.LastIndex(html[:targetIdx], "<td"):targetIdx]
 
-	if blurpleIdx < firstMsgIdx {
-		t.Error("blurple highlight should only be on target message, not context")
+	if strings.Contains(contextTd, "border-left") {
+		t.Error("context message td should not have border-left")
 	}
-}
-
-func TestEmailTemplate_NoContext(t *testing.T) {
-	t.Parallel()
-
-	data := ForwardData{
-		ServerName:  "Test Server",
-		ChannelName: "general",
-		MessageLink: "https://discord.com/channels/1/2/3",
-		TargetMessage: MessageData{
-			AuthorName: "Alice",
-			Content:    "Solo message",
-		},
-	}
-
-	var buf bytes.Buffer
-	if err := emailTemplate.Execute(&buf, data); err != nil {
-		t.Fatalf("template error: %v", err)
-	}
-
-	if !strings.Contains(buf.String(), "Solo message") {
-		t.Error("missing target message")
+	if !strings.Contains(targetTd, "border-left:3px solid #5865F2") {
+		t.Error("target message td should have blurple border-left")
 	}
 }
