@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"flag"
-	"log/slog"
+	"fmt"
 	"os"
 )
 
@@ -30,27 +30,23 @@ func parseFlags(args []string) options {
 	return opts
 }
 
-func (o options) validate() {
+func (o options) validate() error {
 	if o.discordToken == "" {
-		slog.Error("required config is not set", "flag", "discord-token")
-		os.Exit(1)
+		return fmt.Errorf("required config is not set: discord-token")
 	}
 	if o.discordAppID == "" {
-		slog.Error("required config is not set", "flag", "discord-app-id")
-		os.Exit(1)
+		return fmt.Errorf("required config is not set: discord-app-id")
 	}
 	if o.discordPublicKey == "" {
-		slog.Error("required config is not set", "flag", "discord-public-key")
-		os.Exit(1)
+		return fmt.Errorf("required config is not set: discord-public-key")
 	}
 	if o.gmailUser == "" {
-		slog.Error("required config is not set", "flag", "gmail-user")
-		os.Exit(1)
+		return fmt.Errorf("required config is not set: gmail-user")
 	}
 	if o.gmailAppPassword == "" {
-		slog.Error("required config is not set", "flag", "gmail-app-password")
-		os.Exit(1)
+		return fmt.Errorf("required config is not set: gmail-app-password")
 	}
+	return nil
 }
 
 func envOrDefault(key, fallback string) string {

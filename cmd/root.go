@@ -14,13 +14,20 @@ import (
 
 func Execute() {
 	opts := parseFlags(os.Args[1:])
-	opts.validate()
+	if err := opts.validate(); err != nil {
+		slog.Error("invalid config", "error", err)
+		os.Exit(1)
+	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
 	mailer := email.NewMailer(opts.gmailUser, opts.gmailAppPassword)
-	handler := discord.NewHandler(opts.discordPublicKey, opts.discordToken, opts.discordAppID, opts.gmailUser, mailer)
+	handler, err := discord.NewHandler(opts.discordPublicKey, opts.discordToken, opts.discordAppID, opts.gmailUser, mailer)
+	if err != nil {
+		slog.Error("failed to create handler", "error", err)
+		os.Exit(1)
+	}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/interactions", handler.HandleInteraction)
@@ -30,7 +37,7 @@ func Execute() {
 	go func() {
 		<-ctx.Done()
 		slog.Info("shutting down")
-		_ = srv.Close()
+		_ = srv.Shutdown(context.Background())
 	}()
 
 	slog.Info("listening", "port", opts.port)

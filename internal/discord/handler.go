@@ -21,17 +21,15 @@ type Handler struct {
 	mailer    *email.Mailer
 }
 
-func NewHandler(publicKeyHex, token, appID, gmailUser string, mailer *email.Mailer) *Handler {
+func NewHandler(publicKeyHex, token, appID, gmailUser string, mailer *email.Mailer) (*Handler, error) {
 	key, err := hex.DecodeString(publicKeyHex)
 	if err != nil {
-		slog.Error("invalid discord public key", "error", err)
-		panic("invalid DISCORD_PUBLIC_KEY")
+		return nil, fmt.Errorf("invalid discord public key: %w", err)
 	}
 
 	session, err := discordgo.New("Bot " + token)
 	if err != nil {
-		slog.Error("failed to create discord session", "error", err)
-		panic("failed to create discord session")
+		return nil, fmt.Errorf("create discord session: %w", err)
 	}
 
 	return &Handler{
@@ -40,7 +38,7 @@ func NewHandler(publicKeyHex, token, appID, gmailUser string, mailer *email.Mail
 		appID:     appID,
 		gmailUser: gmailUser,
 		mailer:    mailer,
-	}
+	}, nil
 }
 
 func (h *Handler) HandleInteraction(w http.ResponseWriter, r *http.Request) {
