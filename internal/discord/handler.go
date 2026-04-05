@@ -105,6 +105,12 @@ func (h *Handler) handleForward(interaction *discordgo.Interaction) {
 	messageLink := fmt.Sprintf("https://discord.com/channels/%s/%s/%s",
 		guildID, interaction.ChannelID, targetMsg.ID)
 
+	// Fetch context messages (up to 5 before the target).
+	contextMessages, contextErr := h.fetchContext(interaction.ChannelID, targetMsg.ID)
+	if contextErr != nil {
+		slog.Info("context fetch failed, forwarding target only", "error", contextErr)
+	}
+
 	channelName := ""
 	channel, err := h.session.Channel(interaction.ChannelID)
 	if err == nil {
@@ -125,9 +131,10 @@ func (h *Handler) handleForward(interaction *discordgo.Interaction) {
 	}
 
 	emailData := email.ForwardData{
-		ServerName:  serverName,
-		ChannelName: channelName,
-		MessageLink: messageLink,
+		ServerName:      serverName,
+		ChannelName:     channelName,
+		MessageLink:     messageLink,
+		ContextMessages: contextMessages,
 		TargetMessage: email.MessageData{
 			AuthorName: authorName,
 			Content:    targetMsg.Content,
@@ -147,7 +154,32 @@ func (h *Handler) handleForward(interaction *discordgo.Interaction) {
 		return
 	}
 
-	h.editReply(interaction, fmt.Sprintf("✉️ Forwarded to %s (target message only)", h.gmailUser))
+	if contextErr != nil {
+		h.editReply(interaction, fmt.Sprintf("✉️ Forwarded to %s (target message only — no channel access for context)", h.gmailUser))
+	} else {
+		h.editReply(interaction, fmt.Sprintf("✉️ Forwarded to %s (with %d messages of context)", h.gmailUser, len(contextMessages)))
+	}
+}
+
+func (h *Handler) fetchContext(channelID, beforeMessageID string) ([]email.MessageData, error) {
+	messages, err := h.session.ChannelMessages(channelID, 5, beforeMessageID, "", "")
+	if err != nil {
+		return nil, err
+	}
+
+	// ChannelMessages returns newest-first; reverse to oldest-first.
+	context := make([]email.MessageData, len(messages))
+	for i, msg := range messages {
+		authorName := msg.Author.GlobalName
+		if authorName == "" {
+			authorName = msg.Author.Username
+		}
+		context[len(messages)-1-i] = email.MessageData{
+			AuthorName: authorName,
+			Content:    msg.Content,
+		}
+	}
+	return context, nil
 }
 
 func (h *Handler) editReply(interaction *discordgo.Interaction, content string) {
