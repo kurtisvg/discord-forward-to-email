@@ -46,11 +46,31 @@ func TestValidate(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		{"missing token", options{discordAppID: "app", discordPublicKey: "key", gmailUser: "u", gmailAppPassword: "p"}, true},
-		{"missing app id", options{discordToken: "tok", discordPublicKey: "key", gmailUser: "u", gmailAppPassword: "p"}, true},
-		{"missing public key", options{discordToken: "tok", discordAppID: "app", gmailUser: "u", gmailAppPassword: "p"}, true},
-		{"missing gmail user", options{discordToken: "tok", discordAppID: "app", discordPublicKey: "key", gmailAppPassword: "p"}, true},
-		{"missing gmail password", options{discordToken: "tok", discordAppID: "app", discordPublicKey: "key", gmailUser: "u"}, true},
+		{
+			name:    "missing token",
+			opts:    options{discordAppID: "app", discordPublicKey: "key", gmailUser: "u", gmailAppPassword: "p"},
+			wantErr: true,
+		},
+		{
+			name:    "missing app id",
+			opts:    options{discordToken: "tok", discordPublicKey: "key", gmailUser: "u", gmailAppPassword: "p"},
+			wantErr: true,
+		},
+		{
+			name:    "missing public key",
+			opts:    options{discordToken: "tok", discordAppID: "app", gmailUser: "u", gmailAppPassword: "p"},
+			wantErr: true,
+		},
+		{
+			name:    "missing gmail user",
+			opts:    options{discordToken: "tok", discordAppID: "app", discordPublicKey: "key", gmailAppPassword: "p"},
+			wantErr: true,
+		},
+		{
+			name:    "missing gmail password",
+			opts:    options{discordToken: "tok", discordAppID: "app", discordPublicKey: "key", gmailUser: "u"},
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
