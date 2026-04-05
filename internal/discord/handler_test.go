@@ -131,3 +131,87 @@ func TestHandleInteraction_MalformedJSON(t *testing.T) {
 		t.Fatalf("expected 400, got %d", rec.Code)
 	}
 }
+
+func TestIsThread(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		chanType discordgo.ChannelType
+		want     bool
+	}{
+		{"public thread", discordgo.ChannelTypeGuildPublicThread, true},
+		{"private thread", discordgo.ChannelTypeGuildPrivateThread, true},
+		{"text channel", discordgo.ChannelTypeGuildText, false},
+		{"voice channel", discordgo.ChannelTypeGuildVoice, false},
+		{"DM", discordgo.ChannelTypeDM, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			ch := &discordgo.Channel{Type: tt.chanType}
+			if got := isThread(ch); got != tt.want {
+				t.Fatalf("isThread(%d) = %v, want %v", tt.chanType, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestBuildSubject(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name        string
+		channelName string
+		threadName  string
+		serverName  string
+		authorName  string
+		want        string
+	}{
+		{
+			name:        "channel only",
+			channelName: "general",
+			want:        "[Discord] Forwarded chat in #general",
+		},
+		{
+			name:        "thread in channel",
+			channelName: "support",
+			threadName:  "billing issue",
+			want:        "[Discord] Forwarded chat in #support › billing issue",
+		},
+		{
+			name:       "DM",
+			authorName: "Alice",
+			want:       "[Discord] Forwarded DM with Alice",
+		},
+		{
+			name: "fallback",
+			want: "[Discord] Forwarded chat",
+		},
+		{
+			name:        "channel with server (no thread)",
+			channelName: "general",
+			serverName:  "My Server",
+			want:        "[Discord] Forwarded chat in #general",
+		},
+		{
+			name:        "thread with server",
+			channelName: "support",
+			threadName:  "billing issue",
+			serverName:  "My Server",
+			want:        "[Discord] Forwarded chat in #support › billing issue",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got := buildSubject(tt.channelName, tt.threadName, tt.serverName, tt.authorName)
+			if got != tt.want {
+				t.Fatalf("buildSubject(%q, %q, %q, %q) = %q, want %q",
+					tt.channelName, tt.threadName, tt.serverName, tt.authorName, got, tt.want)
+			}
+		})
+	}
+}

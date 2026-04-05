@@ -111,6 +111,43 @@ func TestEmailTemplate(t *testing.T) {
 			want: []string{"report.pdf", `href="https://cdn.example.com/report.pdf"`},
 		},
 		{
+			name: "thread in server",
+			data: ForwardData{
+				ServerName:  "Acme Corp",
+				ChannelName: "support",
+				ThreadName:  "billing issue",
+				MessageLink: "https://discord.com/channels/123/456/789",
+				TargetMessage: MessageData{
+					AuthorName: "Alice",
+					Content:    "Thread content",
+				},
+			},
+			want: []string{
+				"Acme Corp",
+				"#support",
+				"› billing issue",
+				"Thread content",
+			},
+			wantAbsent: []string{"Forwarded DM"},
+		},
+		{
+			name: "thread without server",
+			data: ForwardData{
+				ChannelName: "general",
+				ThreadName:  "my thread",
+				MessageLink: "https://discord.com/channels/123/456/789",
+				TargetMessage: MessageData{
+					AuthorName: "Bob",
+					Content:    "Hello",
+				},
+			},
+			want: []string{
+				"#general",
+				"› my thread",
+			},
+			wantAbsent: []string{"Forwarded DM"},
+		},
+		{
 			name: "attachment only message (no text)",
 			data: ForwardData{
 				ServerName:  "Test",

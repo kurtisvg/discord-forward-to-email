@@ -18,6 +18,7 @@ type MessageData struct {
 type ForwardData struct {
 	ServerName      string
 	ChannelName     string
+	ThreadName      string
 	MessageLink     string
 	ContextMessages []MessageData
 	TargetMessage   MessageData
@@ -36,8 +37,8 @@ const emailTemplateHTML = `<!DOCTYPE html>
         {{/* Header */}}
         <tr><td style="padding:24px 24px 16px 24px;">
           <p style="margin:0;font-size:16px;color:#333;">
-            {{if .ServerName}}Forwarded chat in {{.ServerName}} · #{{.ChannelName}}
-            {{else if .ChannelName}}Forwarded chat in #{{.ChannelName}}
+            {{if .ServerName}}Forwarded chat in {{.ServerName}} · #{{.ChannelName}}{{if .ThreadName}} › {{.ThreadName}}{{end}}
+            {{else if .ChannelName}}Forwarded chat in #{{.ChannelName}}{{if .ThreadName}} › {{.ThreadName}}{{end}}
             {{else}}Forwarded DM with {{.TargetMessage.AuthorName}}
             {{end}}
           </p>
