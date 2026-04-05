@@ -103,6 +103,36 @@ func TestToHTML(t *testing.T) {
 			input: "> line one\n> line two",
 			want:  "<blockquote>line one</blockquote><br><blockquote>line two</blockquote>",
 		},
+		{
+			name:  "user mention",
+			input: "hey <@123456>",
+			want:  "hey <strong>@user:123456</strong>",
+		},
+		{
+			name:  "user mention with nickname",
+			input: "hey <@!123456>",
+			want:  "hey <strong>@user:123456</strong>",
+		},
+		{
+			name:  "channel mention",
+			input: "check <#789012>",
+			want:  "check <strong>#channel:789012</strong>",
+		},
+		{
+			name:  "custom emoji",
+			input: "nice <:thumbsup:123456>",
+			want:  "nice :thumbsup:",
+		},
+		{
+			name:  "animated emoji",
+			input: "wow <a:partyblob:789012>",
+			want:  "wow :partyblob:",
+		},
+		{
+			name:  "spoiler",
+			input: "the answer is ||42||",
+			want:  "the answer is 42",
+		},
 	}
 
 	for _, tt := range tests {

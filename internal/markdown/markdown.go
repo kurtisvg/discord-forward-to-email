@@ -15,9 +15,15 @@ var (
 	boldRe          = regexp.MustCompile(`\*\*(.+?)\*\*`)
 	italicRe        = regexp.MustCompile(`\*(.+?)\*`)
 	strikethroughRe = regexp.MustCompile(`~~(.+?)~~`)
+	spoilerRe       = regexp.MustCompile(`\|\|(.+?)\|\|`)
 	linkRe          = regexp.MustCompile(`\[([^\]]+)\]\(([^)]+)\)`)
 	bareURLRe       = regexp.MustCompile(`(https?://[^\s<]+)`)
 	blockquoteRe    = regexp.MustCompile(`(?m)^&gt; (.+)$`)
+
+	// Discord-specific syntax (matched after HTML escaping, so angle brackets are escaped).
+	userMentionRe    = regexp.MustCompile(`&lt;@!?(\d+)&gt;`)
+	channelMentionRe = regexp.MustCompile(`&lt;#(\d+)&gt;`)
+	customEmojiRe    = regexp.MustCompile(`&lt;a?:(\w+):\d+&gt;`)
 )
 
 // ToHTML converts Discord-flavored markdown to safe HTML.
@@ -49,6 +55,12 @@ func ToHTML(s string) template.HTML {
 		placeholders = append(placeholders, `<a href="`+parts[2]+`">`+parts[1]+`</a>`)
 		return p
 	})
+
+	// Discord-specific syntax.
+	s = userMentionRe.ReplaceAllString(s, "<strong>@user:$1</strong>")
+	s = channelMentionRe.ReplaceAllString(s, "<strong>#channel:$1</strong>")
+	s = customEmojiRe.ReplaceAllString(s, ":$1:")
+	s = spoilerRe.ReplaceAllString(s, "$1")
 
 	// Inline formatting — bold+italic before bold before italic.
 	s = boldItalicRe.ReplaceAllString(s, "<strong><em>$1</em></strong>")
