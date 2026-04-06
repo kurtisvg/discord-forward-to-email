@@ -7,7 +7,9 @@ import (
 )
 
 type options struct {
-	port string
+	host    string
+	port    string
+	gateway bool
 
 	discordToken     string
 	discordAppID     string
@@ -20,7 +22,9 @@ type options struct {
 func parseFlags(args []string) options {
 	var opts options
 	fs := flag.NewFlagSet("discord-forward-to-email", flag.ExitOnError)
+	fs.StringVar(&opts.host, "host", envOrDefault("HOST", ""), "HTTP server host")
 	fs.StringVar(&opts.port, "port", envOrDefault("PORT", "8080"), "HTTP server port")
+	fs.BoolVar(&opts.gateway, "gateway", false, "Use gateway (websocket) mode instead of webhook HTTP server")
 	fs.StringVar(&opts.discordToken, "discord-token", os.Getenv("DISCORD_TOKEN"), "Discord bot token")
 	fs.StringVar(&opts.discordAppID, "discord-app-id", os.Getenv("DISCORD_APP_ID"), "Discord application ID")
 	fs.StringVar(&opts.discordPublicKey, "discord-public-key", os.Getenv("DISCORD_PUBLIC_KEY"), "Discord public key for signature verification")
@@ -37,7 +41,7 @@ func (o options) validate() error {
 	if o.discordAppID == "" {
 		return fmt.Errorf("required config is not set: discord-app-id")
 	}
-	if o.discordPublicKey == "" {
+	if !o.gateway && o.discordPublicKey == "" {
 		return fmt.Errorf("required config is not set: discord-public-key")
 	}
 	if o.gmailUser == "" {
