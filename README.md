@@ -1,4 +1,4 @@
-# Discord Forward-to-Email
+# ✉️ Discord Forward-to-Email
 
 Google Chat has "Forward to inbox." Discord doesn't. Now it does.
 
@@ -8,7 +8,19 @@ Right-click any message, select **Apps** > **Forward to inbox**, and a formatted
   <img src="EXAMPLE.png" width="500" alt="Example email">
 </p>
 
-## Getting started
+## 📖 Table of contents
+
+- [Getting started](#-getting-started)
+  - [1. Create a Discord application](#1-create-a-discord-application)
+  - [2. Set up Gmail](#2-set-up-gmail)
+  - [3. Install and run the server](#3-install-and-run-the-server)
+  - [4. Install the app to your Discord account](#4-install-the-app-to-your-discord-account)
+- [Configuration](#%EF%B8%8F-configuration)
+- [Running modes](#-running-modes)
+- [What you get](#-what-you-get)
+- [Adding the bot to a server](#-adding-the-bot-to-a-server)
+
+## 🚀 Getting started
 
 ### 1. Create a Discord application
 
@@ -26,7 +38,7 @@ Right-click any message, select **Apps** > **Forward to inbox**, and a formatted
 3. Create a new app password (name it anything, e.g. "Discord bot")
 4. Copy the 16-character password — this is your `GMAIL_APP_PASSWORD`
 
-### 3. Install
+### 3. Install and run the server
 
 <details open>
 <summary>Build from source</summary>
@@ -47,31 +59,29 @@ go install github.com/discord-forward-to-email@latest
 
 </details>
 
-### 4. Configure
+Configure and run:
 
 ```sh
 export DISCORD_TOKEN='your-bot-token'
 export DISCORD_APP_ID='your-app-id'
 export GMAIL_USER='you@gmail.com'
 export GMAIL_APP_PASSWORD='your-app-password'
-```
 
-### 5. Run
-
-```sh
 ./fwd2email -gateway
 ```
 
-The bot registers its command on startup. Right-click any message > **Apps** > **Forward to inbox**.
+The bot registers its command on startup.
 
-### 6. Install the app to your Discord account
+### 4. Install the app to your Discord account
 
 1. In the Developer Portal, go to **OAuth2** > **URL Generator**
 2. Select the `applications.commands` scope
 3. Copy the generated URL and open it in your browser
 4. Choose **Install to my account** and authorize
 
-## Configuration
+You're all set. Right-click any message > **Apps** > **Forward to inbox**.
+
+## ⚙️ Configuration
 
 Everything is configurable via flags or environment variables. Flags take precedence.
 
@@ -86,7 +96,7 @@ Everything is configurable via flags or environment variables. Flags take preced
 -gateway                                  Use websocket mode instead of webhooks
 ```
 
-## Running modes
+## 🔌 Running modes
 
 **Gateway mode** — connects to Discord via websocket. No public URL, no signature verification. Great for local dev and personal use.
 
@@ -102,7 +112,7 @@ Everything is configurable via flags or environment variables. Flags take preced
 # to https://your-domain/interactions
 ```
 
-## What you get
+## 📬 What you get
 
 Each forwarded email includes:
 
@@ -113,7 +123,7 @@ Each forwarded email includes:
 - An "Open in Discord" button linking back to the exact message
 - Thread and channel names in the header
 
-## Adding the bot to a server
+## 🏠 Adding the bot to a server
 
 By default, the bot is installed to your user account. It can forward any message you can see, but it can only fetch context messages (the 5 messages before the target) in servers where it's a member.
 
