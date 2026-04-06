@@ -1,0 +1,56 @@
+version: 2
+
+builds:
+  - main: .
+    binary: fwd2email
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - formats:
+      - binary
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+
+checksum:
+  name_template: checksums.txt
+
+dockers:
+  - image_templates:
+      - "ghcr.io/kurtisvg/fwd2email:{{ .Version }}-amd64"
+    use: buildx
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--platform=linux/amd64"
+    goarch: amd64
+  - image_templates:
+      - "ghcr.io/kurtisvg/fwd2email:{{ .Version }}-arm64"
+    use: buildx
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--platform=linux/arm64"
+    goarch: arm64
+
+docker_manifests:
+  - name_template: "ghcr.io/kurtisvg/fwd2email:{{ .Version }}"
+    image_templates:
+      - "ghcr.io/kurtisvg/fwd2email:{{ .Version }}-amd64"
+      - "ghcr.io/kurtisvg/fwd2email:{{ .Version }}-arm64"
+  - name_template: "ghcr.io/kurtisvg/fwd2email:latest"
+    image_templates:
+      - "ghcr.io/kurtisvg/fwd2email:{{ .Version }}-amd64"
+      - "ghcr.io/kurtisvg/fwd2email:{{ .Version }}-arm64"
+
+release:
+  use_existing_draft: true
+  mode: keep-existing
+
+changelog:
+  disable: true
