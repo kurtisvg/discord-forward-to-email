@@ -1,0 +1,7 @@
+.git
+.github
+.golangci.yaml
+*.md
+*.png
+LICENSE
+preview.html
