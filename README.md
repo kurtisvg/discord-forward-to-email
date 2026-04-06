@@ -43,7 +43,7 @@ Right-click any message, select **Apps** > **Forward to inbox**, and a formatted
 <summary>Download a binary</summary>
 
 ```sh
-VERSION="0.0.1"
+VERSION="0.1.0"
 OS="linux"       # or: darwin
 ARCH="amd64"     # or: arm64
 
