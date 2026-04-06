@@ -7,6 +7,7 @@ import (
 )
 
 type options struct {
+	host    string
 	port    string
 	gateway bool
 
@@ -21,6 +22,7 @@ type options struct {
 func parseFlags(args []string) options {
 	var opts options
 	fs := flag.NewFlagSet("discord-forward-to-email", flag.ExitOnError)
+	fs.StringVar(&opts.host, "host", envOrDefault("HOST", ""), "HTTP server host")
 	fs.StringVar(&opts.port, "port", envOrDefault("PORT", "8080"), "HTTP server port")
 	fs.BoolVar(&opts.gateway, "gateway", false, "Use gateway (websocket) mode instead of webhook HTTP server")
 	fs.StringVar(&opts.discordToken, "discord-token", os.Getenv("DISCORD_TOKEN"), "Discord bot token")

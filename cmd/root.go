@@ -39,15 +39,16 @@ func Execute() {
 	if opts.gateway {
 		runGateway(ctx, handler)
 	} else {
-		runWebhook(ctx, handler, opts.port)
+		runWebhook(ctx, handler, opts.host, opts.port)
 	}
 }
 
-func runWebhook(ctx context.Context, handler *discord.Handler, port string) {
+func runWebhook(ctx context.Context, handler *discord.Handler, host, port string) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/interactions", handler.HandleInteraction)
 
-	srv := &http.Server{Addr: net.JoinHostPort("", port), Handler: mux}
+	addr := net.JoinHostPort(host, port)
+	srv := &http.Server{Addr: addr, Handler: mux}
 
 	go func() {
 		<-ctx.Done()
@@ -55,7 +56,7 @@ func runWebhook(ctx context.Context, handler *discord.Handler, port string) {
 		_ = srv.Shutdown(context.Background())
 	}()
 
-	slog.Info("listening (webhook mode)", "port", port)
+	slog.Info("listening (webhook mode)", "addr", addr)
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		slog.Error("server error", "error", err)
 		os.Exit(1)
