@@ -73,12 +73,12 @@ The bot registers its command on startup.
 
 ### 4. Install the app to your Discord account
 
+> **⚠️ Important:** Discord bots are public by default, meaning anyone can install and use yours — including sending emails through your Gmail. Go to **Bot** in the Developer Portal and uncheck **Public Bot** to restrict it to your account only.
+
 1. In the Developer Portal, go to **OAuth2** > **URL Generator**
 2. Select the `applications.commands` scope
 3. Copy the generated URL and open it in your browser
 4. Choose **Install to my account** and authorize
-
-> **⚠️ Important:** Discord bots are public by default, meaning anyone can install and use yours — including sending emails through your Gmail. Go to **Bot** in the Developer Portal and uncheck **Public Bot** to restrict it to your account only.
 
 You're all set. Right-click any message > **Apps** > **Forward to inbox**.
 
