@@ -34,7 +34,7 @@ Right-click any message, select **Apps** > **Forward to inbox**, and a formatted
 
 1. Go to [myaccount.google.com](https://myaccount.google.com) > **Security** > **2-Step Verification** (must be enabled)
 2. At the bottom of the 2-Step Verification page, click **App passwords**
-3. Create a new app password (name it anything, e.g. "Discord bot")
+3. Create a new app password (name it anything, e.g. "My Discord to Email Bot")
 4. Copy the 16-character password — this is your `GMAIL_APP_PASSWORD`
 
 ### 3. Install and run the server
@@ -125,7 +125,3 @@ To add context message support in a server:
 6. Select the server you want to add it to
 
 In servers where the bot isn't a member, it gracefully falls back to forwarding just the target message.
-
-## License
-
-MIT
