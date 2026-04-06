@@ -18,3 +18,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build image
         run: docker build -t fwd2email:test .
+      - name: Verify container runs
+        run: |
+          output=$(docker run --rm fwd2email:test 2>&1 || true)
+          echo "$output"
+          echo "$output" | grep -q "required config is not set"
