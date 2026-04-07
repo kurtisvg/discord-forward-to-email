@@ -14,7 +14,7 @@ func TestParseFlags(t *testing.T) {
 		wantPort string
 	}{
 		{"default port", []string{}, "8080"},
-		{"custom port", []string{"-port", "9090"}, "9090"},
+		{"custom port", []string{"--port", "9090"}, "9090"},
 	}
 
 	for _, tt := range tests {

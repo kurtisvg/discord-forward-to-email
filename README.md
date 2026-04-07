@@ -61,11 +61,10 @@ Or download from the [releases page](https://github.com/kurtisvg/discord-fwd2ema
 docker run --rm \
   -e DISCORD_TOKEN='your-bot-token' \
   -e DISCORD_APP_ID='your-app-id' \
-  -e EMAIL_PROVIDER='resend' \
   -e RESEND_API_KEY='re_xxxxxxxxx' \
   -e FROM_EMAIL='forwarded@yourdomain.com' \
   -e TO_EMAIL='you@example.com' \
-  ghcr.io/kurtisvg/fwd2email:latest -gateway
+  ghcr.io/kurtisvg/fwd2email:latest --gateway
 ```
 
 </details>
@@ -98,7 +97,7 @@ export RESEND_API_KEY='re_xxxxxxxxx'
 export FROM_EMAIL='forwarded@yourdomain.com'
 export TO_EMAIL='you@example.com'
 
-./fwd2email -gateway
+./fwd2email --gateway
 ```
 
 The bot registers its command on startup.
@@ -119,15 +118,15 @@ You're all set. Right-click any message > **Apps** > **Forward to inbox**.
 Everything is configurable via flags or environment variables. Flags take precedence.
 
 ```
--discord-token     / DISCORD_TOKEN        Bot token (required)
--discord-app-id    / DISCORD_APP_ID       Application ID (required)
--discord-public-key / DISCORD_PUBLIC_KEY  Public key (webhook mode only)
--resend-api-key    / RESEND_API_KEY       Resend API key (required)
--from-email        / FROM_EMAIL           Sender email address (required)
--to-email          / TO_EMAIL             Recipient email address (required)
--host              / HOST                 Server host (default: all interfaces)
--port              / PORT                 Server port (default: 8080)
--gateway                                  Use websocket mode instead of webhooks
+--discord-token     / DISCORD_TOKEN        Bot token (required)
+--discord-app-id    / DISCORD_APP_ID       Application ID (required)
+--discord-public-key / DISCORD_PUBLIC_KEY  Public key (webhook mode only)
+--resend-api-key    / RESEND_API_KEY       Resend API key (required)
+--from-email        / FROM_EMAIL           Sender email address (required)
+--to-email          / TO_EMAIL             Recipient email address (required)
+--host              / HOST                 Server host (default: all interfaces)
+--port              / PORT                 Server port (default: 8080)
+--gateway                                  Use websocket mode instead of webhooks
 ```
 
 ## 🔌 Gateway vs webhook mode
@@ -135,7 +134,7 @@ Everything is configurable via flags or environment variables. Flags take preced
 **Gateway mode** — connects to Discord via websocket. No public URL, no signature verification. Great for local dev and personal use.
 
 ```sh
-./fwd2email -gateway
+./fwd2email --gateway
 ```
 
 **Webhook mode** — runs an HTTP server that receives interaction POSTs from Discord. Requires a public HTTPS URL and the public key for signature verification. This is what you'd use on Cloud Run or similar.

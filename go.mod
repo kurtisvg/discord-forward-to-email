@@ -2,7 +2,10 @@ module github.com/kurtisvg/discord-fwd2email
 
 go 1.24.2
 
-require github.com/bwmarrin/discordgo v0.29.0
+require (
+	github.com/bwmarrin/discordgo v0.29.0
+	github.com/spf13/pflag v1.0.10
+)
 
 require (
 	github.com/gorilla/websocket v1.4.2 // indirect

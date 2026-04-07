@@ -1,9 +1,10 @@
 package cmd
 
 import (
-	"flag"
 	"fmt"
 	"os"
+
+	flag "github.com/spf13/pflag"
 )
 
 type options struct {
