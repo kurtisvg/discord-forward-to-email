@@ -30,12 +30,11 @@ Right-click any message, select **Apps** > **Forward to inbox**, and a formatted
 5. Go to **Bot** in the left sidebar, click **Reset Token**, and copy it — this is your `DISCORD_TOKEN`
 6. Go to **Installation** in the left sidebar and check **User Install**
 
-### 2. Set up Gmail
+### 2. Set up Resend
 
-1. Go to [myaccount.google.com](https://myaccount.google.com) > **Security** > **2-Step Verification** (must be enabled)
-2. At the bottom of the 2-Step Verification page, click **App passwords**
-3. Create a new app password (name it anything, e.g. "My Discord to Email Bot")
-4. Copy the 16-character password — this is your `GMAIL_APP_PASSWORD`
+1. Create a free account at [resend.com](https://resend.com)
+2. Go to **API Keys** and create a new key — this is your `RESEND_API_KEY`
+3. Go to **Domains** and add a sending domain, or use the default `onboarding@resend.dev` for testing
 
 ### 3. Install and run the server
 
@@ -62,8 +61,10 @@ Or download from the [releases page](https://github.com/kurtisvg/discord-fwd2ema
 docker run --rm \
   -e DISCORD_TOKEN='your-bot-token' \
   -e DISCORD_APP_ID='your-app-id' \
-  -e GMAIL_USER='you@gmail.com' \
-  -e GMAIL_APP_PASSWORD='your-app-password' \
+  -e EMAIL_PROVIDER='resend' \
+  -e RESEND_API_KEY='re_xxxxxxxxx' \
+  -e FROM_EMAIL='forwarded@yourdomain.com' \
+  -e TO_EMAIL='you@example.com' \
   ghcr.io/kurtisvg/fwd2email:latest -gateway
 ```
 
@@ -93,8 +94,9 @@ Configure and run:
 ```sh
 export DISCORD_TOKEN='your-bot-token'
 export DISCORD_APP_ID='your-app-id'
-export GMAIL_USER='you@gmail.com'
-export GMAIL_APP_PASSWORD='your-app-password'
+export RESEND_API_KEY='re_xxxxxxxxx'
+export FROM_EMAIL='forwarded@yourdomain.com'
+export TO_EMAIL='you@example.com'
 
 ./fwd2email -gateway
 ```
@@ -103,7 +105,7 @@ The bot registers its command on startup.
 
 ### 4. Install the app to your Discord account
 
-> **⚠️ Important:** Discord bots are public by default, meaning anyone can install and use yours — including sending emails through your Gmail. Go to **Bot** in the Developer Portal and uncheck **Public Bot** to restrict it to your account only.
+> **⚠️ Important:** Discord bots are public by default, meaning anyone can install and use yours — including sending emails through your account. Go to **Bot** in the Developer Portal and uncheck **Public Bot** to restrict it to your account only.
 
 1. In the Developer Portal, go to **OAuth2** > **URL Generator**
 2. Select the `applications.commands` scope
@@ -120,8 +122,12 @@ Everything is configurable via flags or environment variables. Flags take preced
 -discord-token     / DISCORD_TOKEN        Bot token (required)
 -discord-app-id    / DISCORD_APP_ID       Application ID (required)
 -discord-public-key / DISCORD_PUBLIC_KEY  Public key (webhook mode only)
--gmail-user        / GMAIL_USER           Gmail address (required)
--gmail-app-password / GMAIL_APP_PASSWORD  App password (required)
+-email-provider    / EMAIL_PROVIDER       Email provider: smtp or resend (default: smtp)
+-from-email        / FROM_EMAIL           Sender email address (resend)
+-to-email          / TO_EMAIL             Recipient email address (required)
+-resend-api-key    / RESEND_API_KEY       Resend API key (resend)
+-smtp-user         / SMTP_USER            SMTP username (smtp)
+-smtp-password     / SMTP_PASSWORD        SMTP password (smtp)
 -host              / HOST                 Server host (default: all interfaces)
 -port              / PORT                 Server port (default: 8080)
 -gateway                                  Use websocket mode instead of webhooks
