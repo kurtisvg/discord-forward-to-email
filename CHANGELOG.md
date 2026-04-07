@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.0](https://github.com/kurtisvg/discord-fwd2email/compare/v0.1.0...v0.2.0) (2026-04-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* switch to pflag for POSIX flags. ([#32](https://github.com/kurtisvg/discord-fwd2email/issues/32))
+* remove SMTP provider ([#31](https://github.com/kurtisvg/discord-fwd2email/issues/31))
+
+### Features
+
+* add support for Resent ([#29](https://github.com/kurtisvg/discord-fwd2email/issues/29)) ([a7dad93](https://github.com/kurtisvg/discord-fwd2email/commit/a7dad937136831ee18211538f70f02eb67550d5c))
+* remove SMTP provider ([#31](https://github.com/kurtisvg/discord-fwd2email/issues/31)) ([6b6fa94](https://github.com/kurtisvg/discord-fwd2email/commit/6b6fa942ccb6a10fcbbcbdd6254c7b9907f049f1))
+* render Discord embeds ([#33](https://github.com/kurtisvg/discord-fwd2email/issues/33)) ([9860c03](https://github.com/kurtisvg/discord-fwd2email/commit/9860c03c5419ceb59ee515ca9b91a7fa90b7751a))
+* switch to pflag for POSIX flags. ([#32](https://github.com/kurtisvg/discord-fwd2email/issues/32)) ([db15b0c](https://github.com/kurtisvg/discord-fwd2email/commit/db15b0cd5ce7d519a7360e9fd9457e8fdd21d29b))
+
 ## [0.1.0](https://github.com/kurtisvg/discord-fwd2email/compare/v0.0.1...v0.1.0) (2026-04-06)
 
 
