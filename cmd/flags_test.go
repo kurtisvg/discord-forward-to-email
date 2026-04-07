@@ -28,27 +28,14 @@ func TestParseFlags(t *testing.T) {
 	}
 }
 
-func validSMTPOpts() options {
+func validOpts() options {
 	return options{
 		discordToken:     "tok",
 		discordAppID:     "app",
 		discordPublicKey: "key",
-		emailProvider:    "smtp",
-		toEmail:          "user@example.com",
-		smtpUser:         "smtp@gmail.com",
-		smtpPassword:     "pass",
-	}
-}
-
-func validResendOpts() options {
-	return options{
-		discordToken:     "tok",
-		discordAppID:     "app",
-		discordPublicKey: "key",
-		emailProvider:    "resend",
-		toEmail:          "user@example.com",
-		fromEmail:        "bot@example.com",
 		resendAPIKey:     "re_xxx",
+		fromEmail:        "bot@example.com",
+		toEmail:          "user@example.com",
 	}
 }
 
@@ -61,61 +48,42 @@ func TestValidate(t *testing.T) {
 		errContains string
 	}{
 		{
-			name: "smtp valid",
-			opts: validSMTPOpts(),
-		},
-		{
-			name: "resend valid",
-			opts: validResendOpts(),
+			name: "all set",
+			opts: validOpts(),
 		},
 		{
 			name:        "missing token",
-			opts:        func() options { o := validSMTPOpts(); o.discordToken = ""; return o }(),
+			opts:        func() options { o := validOpts(); o.discordToken = ""; return o }(),
 			errContains: "discord-token",
 		},
 		{
 			name:        "missing app id",
-			opts:        func() options { o := validSMTPOpts(); o.discordAppID = ""; return o }(),
+			opts:        func() options { o := validOpts(); o.discordAppID = ""; return o }(),
 			errContains: "discord-app-id",
 		},
 		{
 			name:        "missing public key",
-			opts:        func() options { o := validSMTPOpts(); o.discordPublicKey = ""; return o }(),
+			opts:        func() options { o := validOpts(); o.discordPublicKey = ""; return o }(),
 			errContains: "discord-public-key",
 		},
 		{
 			name: "gateway skips public key",
-			opts: func() options { o := validSMTPOpts(); o.discordPublicKey = ""; o.gateway = true; return o }(),
+			opts: func() options { o := validOpts(); o.discordPublicKey = ""; o.gateway = true; return o }(),
 		},
 		{
-			name:        "missing to-email",
-			opts:        func() options { o := validSMTPOpts(); o.toEmail = ""; return o }(),
-			errContains: "to-email",
-		},
-		{
-			name:        "smtp missing user",
-			opts:        func() options { o := validSMTPOpts(); o.smtpUser = ""; return o }(),
-			errContains: "smtp-user",
-		},
-		{
-			name:        "smtp missing password",
-			opts:        func() options { o := validSMTPOpts(); o.smtpPassword = ""; return o }(),
-			errContains: "smtp-password",
-		},
-		{
-			name:        "resend missing api key",
-			opts:        func() options { o := validResendOpts(); o.resendAPIKey = ""; return o }(),
+			name:        "missing resend api key",
+			opts:        func() options { o := validOpts(); o.resendAPIKey = ""; return o }(),
 			errContains: "resend-api-key",
 		},
 		{
-			name:        "resend missing from email",
-			opts:        func() options { o := validResendOpts(); o.fromEmail = ""; return o }(),
+			name:        "missing from email",
+			opts:        func() options { o := validOpts(); o.fromEmail = ""; return o }(),
 			errContains: "from-email",
 		},
 		{
-			name:        "unknown provider",
-			opts:        func() options { o := validSMTPOpts(); o.emailProvider = "mailgun"; return o }(),
-			errContains: "unknown email provider",
+			name:        "missing to email",
+			opts:        func() options { o := validOpts(); o.toEmail = ""; return o }(),
+			errContains: "to-email",
 		},
 	}
 
