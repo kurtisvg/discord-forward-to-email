@@ -45,9 +45,20 @@ func NewHandler(publicKeyHex, token, appID, toEmail string, sender email.Sender)
 
 // RegisterCommand registers the "Forward to inbox" message command globally.
 func (h *Handler) RegisterCommand() error {
+	contexts := []discordgo.InteractionContextType{
+		discordgo.InteractionContextGuild,
+		discordgo.InteractionContextBotDM,
+		discordgo.InteractionContextPrivateChannel,
+	}
+	integrationTypes := []discordgo.ApplicationIntegrationType{
+		discordgo.ApplicationIntegrationGuildInstall,
+		discordgo.ApplicationIntegrationUserInstall,
+	}
 	_, err := h.session.ApplicationCommandCreate(h.appID, "", &discordgo.ApplicationCommand{
-		Name: "Forward to inbox",
-		Type: discordgo.MessageApplicationCommand,
+		Name:             "Forward to inbox",
+		Type:             discordgo.MessageApplicationCommand,
+		Contexts:         &contexts,
+		IntegrationTypes: &integrationTypes,
 	})
 	return err
 }
