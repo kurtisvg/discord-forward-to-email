@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.1](https://github.com/kurtisvg/discord-fwd2email/compare/v0.2.0...v0.2.1) (2026-04-12)
+
+
+### Bug Fixes
+
+* register command with DM and private channel contexts ([#34](https://github.com/kurtisvg/discord-fwd2email/issues/34)) ([a9286cf](https://github.com/kurtisvg/discord-fwd2email/commit/a9286cf78fe6c4defc57f15185dc77c01f41f20a))
+* register command with DM and private channel contexts ([#36](https://github.com/kurtisvg/discord-fwd2email/issues/36)) ([4a59ee8](https://github.com/kurtisvg/discord-fwd2email/commit/4a59ee81bd1357f2e7edd73d3046c060323d5da7))
+* unique email subjects to prevent threading ([#37](https://github.com/kurtisvg/discord-fwd2email/issues/37)) ([9a566d8](https://github.com/kurtisvg/discord-fwd2email/commit/9a566d8756e4cf695cd35fad1cf8b4d5ddd888e5))
+
 ## [0.2.0](https://github.com/kurtisvg/discord-fwd2email/compare/v0.1.0...v0.2.0) (2026-04-07)
 
 
