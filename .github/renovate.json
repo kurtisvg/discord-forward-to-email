@@ -6,6 +6,10 @@
   "postUpdateOptions": ["gomodTidy"],
   "packageRules": [
     {
+      "matchDepNames": ["go"],
+      "groupName": "go version"
+    },
+    {
       "matchManagers": ["gomod"],
       "groupName": "go dependencies"
     },
