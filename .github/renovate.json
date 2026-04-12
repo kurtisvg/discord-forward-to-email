@@ -3,6 +3,7 @@
   "extends": ["config:recommended", ":semanticCommits"],
   "dependencyDashboard": true,
   "minimumReleaseAge": "14 days",
+  "postUpdateOptions": ["gomodTidy"],
   "packageRules": [
     {
       "matchManagers": ["gomod"],
