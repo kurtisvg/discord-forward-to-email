@@ -1,6 +1,6 @@
 module github.com/kurtisvg/discord-fwd2email
 
-go 1.24.2
+go 1.26.1
 
 require (
 	github.com/bwmarrin/discordgo v0.29.0
